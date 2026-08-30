@@ -24,7 +24,7 @@
       display: block;
     }
 
-    /* MENSAJE TIENRO EN LA ESQUINA INFERIOR DERECHA */
+    /* MENSAJE TIENO EN LA ESQUINA INFERIOR DERECHA */
     .love-message {
       position: absolute;
       bottom: 25px;
@@ -34,7 +34,7 @@
       font-weight: bold;
       letter-spacing: 0.5px;
       text-shadow: 0 0 8px #ff1493, 0 0 15px #ff69b4;
-      pointer-events: none; /* Permite rotar la galaxia aunque toques cerca del texto */
+      pointer-events: none;
       z-index: 10;
       opacity: 0.9;
     }
@@ -45,9 +45,9 @@
   <div id="webgl-container"></div>
 
   <!-- Texto en la esquina inferior derecha -->
-  <div class="love-message">Te amo mi jasmincita peshosha 💞</div>
+  <div class="love-message">TE AMO MI JASMINCITA HERMOSA!! 💞</div>
 
-  <!-- Three.js y OrbitControls oficial para Zoom y Rotación -->
+  <!-- Three.js y OrbitControls oficial -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 
@@ -143,20 +143,20 @@
     const core = new THREE.Mesh(coreGeometry, coreMaterial);
     galaxyGroup.add(core);
 
-    // 5. FRASES FLOTANTES
+    // 5. NUEVA LISTA DE FRASES FLOTANTES
     const phrases = [
       "ERES MI PRINCESITA💞",
       "ERES MI VIDA💞",
       "ERES MI CIELO💞",
-      "ERES MI BEBE💞",
+      "ERES MI BEBÉ💞",
       "ERES MI REINA💞",
-      "ERES MI ÑIÑA💞",
+      "ERES MI NIÑA💞",
       "ERES MI PATRONCITA💞",
       "ERES MI MUJERCHITA💞",
       "ERES MI MAMIII💞",
       "ERES MI ESTRELLITA LINDA💞",
       "ERES MI UNIVERSO💞",
-      "ERES MI LUGAR SEGURO💞
+      "ERES MI LUGAR SEGURO💞"
     ];
 
     function createTextSprite(text) {
