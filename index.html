@@ -2,8 +2,8 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Galaxia </title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <title>Galaxia</title>
   <style>
     * {
       margin: 0;
@@ -16,32 +16,19 @@
       overflow: hidden;
       background-color: #000000;
       font-family: 'Arial', sans-serif;
+      touch-action: none; /* Evita que la página se desplace al tocar */
     }
     #webgl-container {
       width: 100vw;
       height: 100vh;
       display: block;
     }
-    .title-overlay {
-      position: absolute;
-      bottom: 30px;
-      width: 100%;
-      text-align: center;
-      color: #ffb6c1;
-      font-size: 1.8rem;
-      font-weight: bold;
-      letter-spacing: 2px;
-      text-shadow: 0 0 10px #ff1493, 0 0 20px #ff1493;
-      pointer-events: none;
-    }
   </style>
 </head>
 <body>
 
-  <div class="title-overlay"></div>
   <div id="webgl-container"></div>
 
-  <!-- Librería Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
@@ -49,28 +36,29 @@
     const container = document.getElementById('webgl-container');
     const scene = new THREE.Scene();
     
+    const isMobile = window.innerWidth < 768;
     const camera = new THREE.PerspectiveCamera(
-      60,
+      isMobile ? 65 : 60,
       window.innerWidth / window.innerHeight,
       0.1,
       1000
     );
-    camera.position.set(0, 7, 11);
+    camera.position.set(0, isMobile ? 8 : 7, isMobile ? 12 : 11);
     camera.lookAt(0, 0, 0);
 
-    const renderer = new THREE.WebGLRenderer({ antialias: true });
+    const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: "high-performance" });
     renderer.setSize(window.innerWidth, window.innerHeight);
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     container.appendChild(renderer.domElement);
 
-    // GRUPO PRINCIPAL (Galaxia + Frases)
+    // GRUPO PRINCIPAL
     const galaxyGroup = new THREE.Group();
     scene.add(galaxyGroup);
 
     // 2. GALAXIA EN ESPIRAL (PARTÍCULAS)
     const parameters = {
-      count: 16000,
-      size: 0.035,
+      count: isMobile ? 12000 : 16000,
+      size: isMobile ? 0.04 : 0.035,
       radius: 8,
       branches: 3,
       spin: 1.2,
@@ -128,7 +116,7 @@
     const core = new THREE.Mesh(coreGeometry, coreMaterial);
     galaxyGroup.add(core);
 
-    // 4. FRASES CON LA ESTRUCTURA "ERES MI..."
+    // 4. FRASES FLOTANTES
     const phrases = [
       "ERES MI PRINCESA💞",
       "ERES MI VIDA💞",
@@ -150,7 +138,7 @@
       canvas.width = 512;
       canvas.height = 128;
 
-      ctx.font = 'Bold 38px Arial';
+      ctx.font = 'Bold 34px Arial';
       ctx.fillStyle = '#ffffff';
       ctx.textAlign = 'center';
       ctx.shadowColor = '#ff1493';
@@ -165,7 +153,8 @@
       });
 
       const sprite = new THREE.Sprite(spriteMaterial);
-      sprite.scale.set(2.8, 0.7, 1);
+      const scaleX = isMobile ? 2.4 : 2.8;
+      sprite.scale.set(scaleX, scaleX * 0.25, 1);
       return sprite;
     }
 
@@ -173,7 +162,7 @@
       const sprite = createTextSprite(phrase);
       
       const angle = (index / phrases.length) * Math.PI * 2;
-      const radius = 2.5 + Math.random() * 4.5;
+      const radius = 2.5 + Math.random() * 4.2;
       
       sprite.position.x = Math.cos(angle) * radius;
       sprite.position.y = (Math.random() - 0.5) * 0.8;
@@ -182,12 +171,71 @@
       galaxyGroup.add(sprite);
     });
 
-    // 5. ANIMACIÓN Y ROTACIÓN
+    // 5. CONTROL TÁCTIL Y MOUSE MANUAL (100% COMPATIBLE CON MÓVILES)
+    let isDragging = false;
+    let previousTouchX = 0;
+    let previousTouchY = 0;
+
+    // Eventos para Teléfono (Touch)
+    window.addEventListener('touchstart', (e) => {
+      if (e.touches.length === 1) {
+        isDragging = true;
+        previousTouchX = e.touches[0].clientX;
+        previousTouchY = e.touches[0].clientY;
+      }
+    });
+
+    window.addEventListener('touchmove', (e) => {
+      if (!isDragging || e.touches.length !== 1) return;
+
+      const deltaX = e.touches[0].clientX - previousTouchX;
+      const deltaY = e.touches[0].clientY - previousTouchY;
+
+      galaxyGroup.rotation.y += deltaX * 0.005;
+      galaxyGroup.rotation.x += deltaY * 0.005;
+
+      previousTouchX = e.touches[0].clientX;
+      previousTouchY = e.touches[0].clientY;
+    });
+
+    window.addEventListener('touchend', () => {
+      isDragging = false;
+    });
+
+    // Eventos para Mouse (PC)
+    window.addEventListener('mousedown', (e) => {
+      isDragging = true;
+      previousTouchX = e.clientX;
+      previousTouchY = e.clientY;
+    });
+
+    window.addEventListener('mousemove', (e) => {
+      if (!isDragging) return;
+
+      const deltaX = e.clientX - previousTouchX;
+      const deltaY = e.clientY - previousTouchY;
+
+      galaxyGroup.rotation.y += deltaX * 0.005;
+      galaxyGroup.rotation.x += deltaY * 0.005;
+
+      previousTouchX = e.clientX;
+      previousTouchY = e.clientY;
+    });
+
+    window.addEventListener('mouseup', () => {
+      isDragging = false;
+    });
+
+    // 6. ANIMACIÓN
     const clock = new THREE.Clock();
 
     function animate() {
       const elapsedTime = clock.getElapsedTime();
-      galaxyGroup.rotation.y = elapsedTime * 0.12;
+      
+      // Rotación continua cuando no se está arrastrando con el dedo
+      if (!isDragging) {
+        galaxyGroup.rotation.y += 0.002;
+      }
 
       renderer.render(scene, camera);
       requestAnimationFrame(animate);
@@ -199,6 +247,7 @@
       camera.aspect = window.innerWidth / window.innerHeight;
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
     });
   </script>
 </body>
