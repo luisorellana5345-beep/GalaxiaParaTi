@@ -16,7 +16,7 @@
       overflow: hidden;
       background-color: #000000;
       font-family: 'Arial', sans-serif;
-      touch-action: none; /* Evita que la página se desplace al tocar */
+      touch-action: none; /* Previene gestos por defecto del navegador */
     }
     #webgl-container {
       width: 100vw;
@@ -29,6 +29,7 @@
 
   <div id="webgl-container"></div>
 
+  <!-- Librería Three.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <script>
@@ -171,38 +172,77 @@
       galaxyGroup.add(sprite);
     });
 
-    // 5. CONTROL TÁCTIL Y MOUSE MANUAL (100% COMPATIBLE CON MÓVILES)
+    // 5. INTERACCIÓN: ROTACIÓN Y ZOOM (MÓVIL Y PC)
     let isDragging = false;
     let previousTouchX = 0;
     let previousTouchY = 0;
+    let initialPinchDistance = null;
 
-    // Eventos para Teléfono (Touch)
+    // LÍMITES DE ZOOM
+    const minFov = 20;
+    const maxFov = 90;
+
+    // Zoom con Rueda de Mouse (PC)
+    window.addEventListener('wheel', (e) => {
+      camera.fov += e.deltaY * 0.05;
+      camera.fov = Math.max(minFov, Math.min(maxFov, camera.fov));
+      camera.updateProjectionMatrix();
+    });
+
+    // Eventos Táctiles (Móvil)
     window.addEventListener('touchstart', (e) => {
       if (e.touches.length === 1) {
         isDragging = true;
         previousTouchX = e.touches[0].clientX;
         previousTouchY = e.touches[0].clientY;
+      } else if (e.touches.length === 2) {
+        isDragging = false;
+        // Distancia inicial entre los 2 dedos
+        initialPinchDistance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
       }
     });
 
     window.addEventListener('touchmove', (e) => {
-      if (!isDragging || e.touches.length !== 1) return;
+      // Rotación con 1 dedo
+      if (isDragging && e.touches.length === 1) {
+        const deltaX = e.touches[0].clientX - previousTouchX;
+        const deltaY = e.touches[0].clientY - previousTouchY;
 
-      const deltaX = e.touches[0].clientX - previousTouchX;
-      const deltaY = e.touches[0].clientY - previousTouchY;
+        galaxyGroup.rotation.y += deltaX * 0.005;
+        galaxyGroup.rotation.x += deltaY * 0.005;
 
-      galaxyGroup.rotation.y += deltaX * 0.005;
-      galaxyGroup.rotation.x += deltaY * 0.005;
+        previousTouchX = e.touches[0].clientX;
+        previousTouchY = e.touches[0].clientY;
+      } 
+      // Zoom con 2 dedos (Pinch)
+      else if (e.touches.length === 2 && initialPinchDistance) {
+        const currentDistance = Math.hypot(
+          e.touches[0].clientX - e.touches[1].clientX,
+          e.touches[0].clientY - e.touches[1].clientY
+        );
+        const delta = initialPinchDistance - currentDistance;
 
-      previousTouchX = e.touches[0].clientX;
-      previousTouchY = e.touches[0].clientY;
+        camera.fov += delta * 0.08;
+        camera.fov = Math.max(minFov, Math.min(maxFov, camera.fov));
+        camera.updateProjectionMatrix();
+
+        initialPinchDistance = currentDistance;
+      }
     });
 
-    window.addEventListener('touchend', () => {
-      isDragging = false;
+    window.addEventListener('touchend', (e) => {
+      if (e.touches.length < 2) {
+        initialPinchDistance = null;
+      }
+      if (e.touches.length === 0) {
+        isDragging = false;
+      }
     });
 
-    // Eventos para Mouse (PC)
+    // Eventos Mouse Drag (PC)
     window.addEventListener('mousedown', (e) => {
       isDragging = true;
       previousTouchX = e.clientX;
@@ -232,8 +272,7 @@
     function animate() {
       const elapsedTime = clock.getElapsedTime();
       
-      // Rotación continua cuando no se está arrastrando con el dedo
-      if (!isDragging) {
+      if (!isDragging && !initialPinchDistance) {
         galaxyGroup.rotation.y += 0.002;
       }
 
