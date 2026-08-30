@@ -23,11 +23,29 @@
       height: 100vh;
       display: block;
     }
+
+    /* MENSAJE TIENRO EN LA ESQUINA INFERIOR DERECHA */
+    .love-message {
+      position: absolute;
+      bottom: 25px;
+      right: 25px;
+      color: #ffffff;
+      font-size: 14px;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      text-shadow: 0 0 8px #ff1493, 0 0 15px #ff69b4;
+      pointer-events: none; /* Permite rotar la galaxia aunque toques cerca del texto */
+      z-index: 10;
+      opacity: 0.9;
+    }
   </style>
 </head>
 <body>
 
   <div id="webgl-container"></div>
+
+  <!-- Texto en la esquina inferior derecha -->
+  <div class="love-message">TE AMO MI JASMINCITA PESHOSHA!! 💞</div>
 
   <!-- Three.js y OrbitControls oficial para Zoom y Rotación -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -56,9 +74,9 @@
     const controls = new THREE.OrbitControls(camera, renderer.domElement);
     controls.enableDamping = true;
     controls.dampingFactor = 0.05;
-    controls.enablePan = false; // Mantiene el centro enfocado
-    controls.minDistance = 3;   // Zoom máximo (acercar)
-    controls.maxDistance = 25;  // Zoom mínimo (alejar)
+    controls.enablePan = false;
+    controls.minDistance = 3;   // Zoom máximo
+    controls.maxDistance = 25;  // Zoom mínimo
 
     // GRUPO PRINCIPAL
     const galaxyGroup = new THREE.Group();
@@ -127,18 +145,18 @@
 
     // 5. FRASES FLOTANTES
     const phrases = [
-      "ERES MI PRINCESA💞",
+     "ERES MI PRINCESITA💞",
       "ERES MI VIDA💞",
       "ERES MI CIELO💞",
-      "ERES MI SOL💞",
+      "ERES MI BEBE💞",
       "ERES MI REINA💞",
-      "ERES MI LUZ💞",
-      "ERES MI MUNDO💞",
-      "ERES MI TODO💞",
-      "ERES MI SUEÑO💞",
-      "ERES MI AMOR💞",
+      "ERES MI ÑIÑA💞",
+      "ERES MI PATRONCITA💞",
+      "ERES MI MUJERCHITA💞",
+      "ERES MI MAMIII💞",
+      "ERES MI ESTRELLITA LINDA💞",
       "ERES MI UNIVERSO💞",
-      "ERES MI LUGAR SEGURO💞"
+      "ERES MI LUGAR SEGURO💞
     ];
 
     function createTextSprite(text) {
@@ -186,7 +204,6 @@
     function animate() {
       const elapsedTime = clock.getElapsedTime();
       
-      // Rotación suave continua
       galaxyGroup.rotation.y = elapsedTime * 0.08;
 
       controls.update();
